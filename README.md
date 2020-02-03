@@ -11,7 +11,7 @@ You start the adventure unworthy, unequipped and anonymous. Your first task is t
 # Rooms
 The map is laid out in a grid: Similar to your worlds from Week 1 of your CS training, each room may have exits in the cardinal directions: north, south, east and west. Each room also comes with a unique ID and coordinates for your convenience.
 
-# Copy
+```
 // Starting room
 {
   "room_id": 0,
@@ -25,7 +25,7 @@ The map is laid out in a grid: Similar to your worlds from Week 1 of your CS tra
   "errors": [],
   "messages": []
 }
-# Cooldown
+```
 Your access to the server is restricted until you earn more power. Starting off, you are only allowed to make one request every 15 seconds. Sending another request before that time has elapsed will incur a penalty. The cooldown may decrease as the days wear on - make sure to keep an eye on your cohort’s channel for important updates.
 
 # Initialization
@@ -35,7 +35,7 @@ curl -X GET -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' h
 
 This will return the following response:
 
-Copy
+```
 {
   "room_id": 0,
   "title": "A Dark Room",
@@ -46,6 +46,7 @@ Copy
   "errors": [],
   "messages": []
 }
+```
 # Movement
 All actions are executed via REST API commands to the Lambda Treasure Hunt server. Here is an example movement command:
 
@@ -60,11 +61,11 @@ Note the “direction” parameter, which determines which way you will move.
 Building your Map
 Your first task is to build your map. Starting from room 0, you can begin to construct a graph of the map:
 
-Copy
+```
 {0: {"n": "?", "s": "?", "e": "?", "w": "?"}}
 Moving North from the starting room will return the following response:
-
-Copy
+```
+```
 {
   "room_id": 10,
   "title": "A Dark Room",
@@ -75,13 +76,15 @@ Copy
   "errors": [],
   "messages": ["You have walked north."]
 }
+```
 This room has an ID of 10 and contains exits to the north, south and west. Now, you can fill out another entry in your graph:
 
-Copy
+```
 {
   0: {"n": 10, "s": "?", "e": "?", "w": "?"},
   10: {"n": "?", "s": 0, "w": "?"}
 }
+```
 There are a total of 500 rooms so be thoughtful about how you traverse the map. Note that you begin the hunt blind but will gain new powers as the hunt progresses.
 
 You will be able to progress with future tasks much more quickly if you log ALL room info during your initial traversal / map building (not just room numbers & exits)
@@ -93,7 +96,7 @@ curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' 
 
 Note the new parameter, next_room_id. Your map tells you that room 0 lies south of room 10. This returns the following response:
 
-Copy
+```
 {
   "room_id": 0,
   "title": "A Dark Room",
@@ -106,6 +109,7 @@ Copy
   "errors": [],
   "messages": ["You have walked south.", "Wise Explorer: -50% CD"]
 }
+```
 Note the Wise Explorer bonus and 50% cooldown reduction.
 
 # Treasure
@@ -126,7 +130,7 @@ curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' 
 
 This will return:
 
-Copy
+```
 {
   "room_id": "?",
   "title": "Shop",
@@ -139,6 +143,7 @@ Copy
   "errors": [],
   "messages": ["I'll give you 100 gold for that Small Treasure.", "(include 'confirm':'yes' to sell Small Treasure)"]
 }
+```
 Confirm the sale with the following command:
 
 curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' -H "Content-Type: application/json" -d '{"name":"treasure", "confirm":"yes"}' https://lambda-treasure-hunt.herokuapp.com/api/adv/sell/
@@ -148,7 +153,7 @@ You can check your status and inventory using the following command:
 
 curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' -H "Content-Type: application/json" https://lambda-treasure-hunt.herokuapp.com/api/adv/status/
 
-Copy
+```
 {
   "name": "br80",
   "cooldown": 2.0,
@@ -163,6 +168,7 @@ Copy
   "errors": [],
   "messages": []
 }
+```
 # Examine
 You can examine players or items in your room or inventory using this command:
 
@@ -227,7 +233,7 @@ Does hash(last_proof, proof) contain N leading zeroes, where N is the current di
 
 curl -X GET -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof/
 
-Copy
+```
 {
   "proof": 123456,
   "difficulty": 8,
@@ -235,17 +241,19 @@ Copy
   "messages": [],
   "errors": []
 }
+```
 Balance
 Get your Lambda Coin balance.
 
 curl -X GET -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' https://lambda-treasure-hunt.herokuapp.com/api/bc/get_balance/
 
-Copy
+```
 {
    "cooldown": 1.0,
    "messages": ["You have a balance of 35.0 Lambda Coins"],
    "errors": []
 }
+```
 #Transmogrify
 You can spend your Lambda Coins to transform items into powerful equipment at the transmogrifier using the following command:
 
