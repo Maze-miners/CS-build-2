@@ -193,19 +193,19 @@ If you find a shrine, you may pray at the shrine to earn some new powers:
 
 curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' -H "Content-Type: application/json" https://lambda-treasure-hunt.herokuapp.com/api/adv/pray/
 
-# Flight
+## Flight
 Once earning the power of flight, you may use this ability to avoid movement penalties on elevated terrain:
 
 curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' -H "Content-Type: application/json" -d '{"direction":"n"}' https://lambda-treasure-hunt.herokuapp.com/api/adv/fly/
 
-# Dash
+## Dash
 Once mastering the dash, you may use this ability to cover many rooms in one direction quickly:
 
 curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' -H "Content-Type: application/json" -d '{"direction":"n", "num_rooms":"5", "next_room_ids":"10,19,20,63,72"}' https://lambda-treasure-hunt.herokuapp.com/api/adv/dash/
 
 Formatting is very important for these commands: next_room_ids must match every room in a straight line and num_rooms must be the exact count for the dash to work successfully.
 
-# Carry/Receive
+## Carry/Receive
 You may come across a ghostly companion ease your encumbrance by holding your heaviest item:
 
 curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' -H "Content-Type: application/json" -d '{"name":"[ITEM_NAME]"}' https://lambda-treasure-hunt.herokuapp.com/api/adv/carry/
@@ -219,12 +219,12 @@ Once you acquire your true name, you should seek out the wishing well. Peer into
 
 You may mine for Lambda Coins using the following API endpoints:
 
-# Mine
+## Mine
 Submit a proposed proof and your game token to this endpoint to attempt to mine a block. If successful, you will receive a Lambda Coin. First, you will need to find the appropriate room.
 
 curl -X POST -H 'Authorization: Token 7a375b52bdc410eebbc878ed3e58b2e94a8cb607' -H "Content-Type: application/json" -d '{"proof":new_proof}' https://lambda-treasure-hunt.herokuapp.com/api/bc/mine/
 
-# Proof
+## Proof
 Get the last valid proof to use to mine a new block. Also returns the current difficulty level, which is the number of 0’s required at the beginning of the hash for a new proof to be valid.
 
 The proof of work algorithm for this blockchain is not the same as we used in class. It uses a different method:
