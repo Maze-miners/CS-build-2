@@ -2,6 +2,7 @@ import random
 from structures import Queue, Stack
 from treasure.models import MapRoom
 from functions import move_player, init_player
+import json
 
 # view_stack = []
 # view_queue = []
@@ -19,8 +20,8 @@ class Graph:
             self.rooms[room.room_id] = directions
             self.rooms_count +=1
             
-            map_room = MapRoom(room)
-            map_room.neighbors = directions
+            map_room = MapRoom(room_id=room.room_id, title=room.title, description=room.description, x=room.coordinates[0], y=room.coordinates[1])
+            map_room.neighbors = json.loads(directions)
             map_room.save()
         else:
             print(f"room: {room} already exists, did not add.")
@@ -41,10 +42,10 @@ class Graph:
                 self.rooms[curr_room]['e'] = prev_room
         
         prev_map_room = MapRoom.objects.get(room_id=prev_room)
-        prev_map_room.neighbors = self.rooms[prev_room]
+        prev_map_room.neighbors = json.loads(self.rooms[prev_room])
         prev_map_room.save()
         curr_map_room = MapRoom.objects.get(room_id=curr_room)
-        curr_map_room.neighbors = self.rooms[curr_room]
+        curr_map_room.neighbors = json.loads(self.rooms[curr_room])
         curr_map_room.save()
     
     def dft_rand(self, init_room):
