@@ -1,63 +1,121 @@
 from decouple import config
+from treasure.models import MapRoom
 import requests
 import time
 import sys
 import re
+import json
+
+url = config('API_URL')
+key = config('API_KEY')
+
 
 def init_player():
-    while True:
-        try:
-            player = requests.get(
-                f'{config('API_URL')}/api/adv/init/',
-                headers={
-                    'Authorization': f'Token {config('API_KEY')}',
-                    'Content-Type': 'application/json'
-                }
-            )
-            cooldown = player['cooldown']
-            time.sleep(cooldown)
-            return player
-        except requests.exceptions.RequestExceptions as exception:
-            # cooldown -> will have to check response object to test
-            if exception.response.status_code == 400:
-                time.sleep(cooldown)
-            else:
-                print(exception)
-                sys.exit(1)
+    # while True:
+    try:
+        player_req = requests.get(
+            f"{url}/api/adv/init/",
+            headers={
+                "Authorization": f"Token {key}"
+            }
+        )
+        player_req.raise_for_status()
+        player = player_req.json()
+        cooldown = player['cooldown']
+        time.sleep(cooldown)
+        return player
 
-def move_player(direction):
-    while True:    
+    except requests.exceptions.RequestException as exception:
+        # cooldown -> will have to check response object to test
+        if exception.response.status_code == 400:
+            time.sleep(cooldown)
+        else:
+            print(exception)
+            sys.exit(1)
+
+def init_move(direction): # only used when resuming from previous cancellation
+    try:
+        room_req = requests.post(
+            f"{url}/api/adv/move/",
+            headers={
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
+            },
+            data=json.dumps({"direction": f"{direction}"})
+        )
+        room_req.raise_for_status()
+        room = room_req.json()
+        print(room["messages"])
+        cooldown = room["cooldown"]
+        time.sleep(cooldown)
+        return room
+    except requests.exceptions.RequestException as exception:
+        # cooldown -> will have to check response object to test
+        if exception.response.status_code == 400:
+            time.sleep(cooldown)
+        else:
+            print(exception)
+            sys.exit(1)
+
+def move_player(direction, cur_room_id):
+    cur_room = MapRoom.objects.get(room_id=cur_room_id)
+    neighbors = json.loads(MapRoom.objects.get(room_id=cur_room_id).neighbors)
+
+    if neighbors[direction] == "?":
         try:
-            room = requests.post(
-                f'{config('API_URL')}/api/adv/move/',
+            room_req = requests.post(
+                f"{url}/api/adv/move/",
                 headers={
-                    'Authorization': f'Token {config('API_KEY')}',
-                    'Content-Type': 'application/json'
+                    "Authorization": f"Token {key}",
+                    "Content-Type": "application/json"
                 },
-                data={
-                    'direction': f'{direction}'
-                }
+                data=json.dumps({"direction": f"{direction}"})
             )
-            cooldown = room['cooldown']
+            room_req.raise_for_status()
+            room = room_req.json()
+            cooldown = room["cooldown"]
             time.sleep(cooldown)
             return room
-        except requests.exceptions.RequestExceptions as exception:
+        except requests.exceptions.RequestException as exception:
             # cooldown -> will have to check response object to test
             if exception.response.status_code == 400:
                 time.sleep(cooldown)
             else:
                 print(exception)
                 sys.exit(1)
-
-def move_wise(direction, room_id):
-    pass
+    else:
+        try:
+            room_req = requests.post(
+                f"{url}/api/adv/move/",
+                headers={
+                    "Authorization": f"Token {key}",
+                    "Content-Type": "application/json"
+                },
+                data=json.dumps({
+                    "direction": f"{direction}",
+                    "next_room_id": f"{neighbors[direction]}"
+                })
+            )
+            room_req.raise_for_status()
+            room = room_req.json()
+            cooldown = room["cooldown"]
+            print(room["messages"])
+            time.sleep(cooldown)
+            return room
+        except requests.exceptions.RequestException as exception:
+            # cooldown -> will have to check response object to test
+            if exception.response.status_code == 400:
+                time.sleep(cooldown)
+            else:
+                print(exception)
+                sys.exit(1)
 
 def take_item(item):
     try:
         item = requests.post(
-            f'{config('API_URL')}/api/adv/take/',
+            f'{url}/api/adv/take/',
             headers={
-                'Authorization': f'Token {config('API_KEY')}',
+                'Authorization': f'Token {key}',
                 'Content-Type': 'application/json'
             },
             data={
@@ -73,9 +131,9 @@ def take_item(item):
 def drop_item(item):
     try:
         item = requests.post(
-            f'{config('API_URL')}/api/adv/drop/',
+            f'{url}/api/adv/drop/',
             headers={
-                'Authorization': f'Token {config('API_KEY')}',
+                'Authorization': f'Token {key}',
                 'Content-Type': 'application/json'
             },
             data={
@@ -92,9 +150,9 @@ def sell_treasure():
     while True:
         try:
             sale = requests.post(
-                f'{config('API_URL')}/api/adv/sell/',
+                f'{url}/api/adv/sell/',
                 headers={
-                    'Authorization': f'Token {config('API_KEY')}',
+                    'Authorization': f'Token {key}',
                     'Content-Type': 'application/json'
                 },
                 data={
@@ -108,10 +166,10 @@ def sell_treasure():
             edited_message = re.sub('\([^)]*\)', '(choose YES or NO.)', message)
             print(edited_message)
             prompt = input().lower().strip()
-            if promt == 'yes' or if prompt == 'y':
+            if prompt == 'yes' or prompt == 'y':
                 # make call to confirm
                 return confirm_treasure()
-            elif prompt == 'no' or if prompt == 'n':
+            elif prompt == 'no' or prompt == 'n':
                 # print confirmation message and return
                 # need to decide how to handle return within algorithm
                 print("Sale declined.")
@@ -124,9 +182,9 @@ def sell_treasure():
 def confirm_treasure():
     try:
         confirm = requests.post(
-            f'{config('API_URL')}/api/adv/sell/',
+            f'{url}/api/adv/sell/',
             headers={
-                'Authorization': f'Token {config('API_KEY')}',
+                'Authorization': f'Token {key}',
                 'Content-Type': 'application/json'
             },
             data={
@@ -144,9 +202,9 @@ def confirm_treasure():
 def check_status():
     try:
         status = requests.post(
-            f'{config('API_URL')}/api/adv/status/',
+            f'{url}/api/adv/status/',
             headers={
-                'Authorization': f'Token {config('API_KEY')}',
+                'Authorization': f'Token {key}',
                 'Content-Type': 'application/json'
             }
         )
