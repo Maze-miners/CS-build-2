@@ -1,5 +1,5 @@
 from map.structures import Queue, Stack
-from map.functions import move_player, init_player
+from map.functions import move_player, init_player, init_move
 from treasure.models import MapRoom
 from decouple import config
 import random
@@ -100,6 +100,10 @@ class Graph:
                         # move in direction provided by bfs
                         print(move)
                         prev_room = curr_room
+                        # write to file
+                        f = open("prev_room.txt", "w")
+                        f.write(f"{prev_room['room_id']}")
+                        f.close()
                         curr_room = move_player(move[1], prev_room["room_id"])                   
                     unex_list = []
                     for key, value in self.rooms[new_room].items():
@@ -156,21 +160,18 @@ p = open("prev_room.txt", "r")
 pre_room = p.read()
 prev_room = int(pre_room)
 p.close()
-print(prev_room)
 
 # extract previous random dir
 r = open("random_dir.txt", "r")
 random_dir = r.read()
 r.close()
-print(random_dir)
 
 opposite = {"n": "s", "s": "n", "e": "w", "w": "e"}
 
 # if picking back up after interrupt
 if prev_room != "None":
     # capture previous room object from API by moving
-    print(type(prev_room))
-    roomObj = move_player(opposite[random_dir], prev_room)
+    roomObj = init_move(opposite[random_dir])
     # return to starting room
     move_player(random_dir, prev_room)
 else:

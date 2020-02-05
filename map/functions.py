@@ -32,16 +32,34 @@ def init_player():
         else:
             print(exception)
             sys.exit(1)
-        
+
+def init_move(direction): # only used when resuming from previous cancellation
+    try:
+        room_req = requests.post(
+            f"{url}/api/adv/move/",
+            headers={
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
+            },
+            data=json.dumps({"direction": f"{direction}"})
+        )
+        room_req.raise_for_status()
+        room = room_req.json()
+        print(room["messages"])
+        cooldown = room["cooldown"]
+        time.sleep(cooldown)
+        return room
+    except requests.exceptions.RequestException as exception:
+        # cooldown -> will have to check response object to test
+        if exception.response.status_code == 400:
+            time.sleep(cooldown)
+        else:
+            print(exception)
+            sys.exit(1)
 
 def move_player(direction, cur_room_id):
-    print("!!!", cur_room_id)
-    print(direction)
-    # while True:
     cur_room = MapRoom.objects.get(room_id=cur_room_id)
     neighbors = json.loads(MapRoom.objects.get(room_id=cur_room_id).neighbors)
-    print(cur_room.neighbors)
-    print(neighbors)
 
     if neighbors[direction] == "?":
         try:
