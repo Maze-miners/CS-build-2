@@ -73,6 +73,7 @@ def move_player(direction, cur_room_id):
             )
             room_req.raise_for_status()
             room = room_req.json()
+            print(room["messages"])
             cooldown = room["cooldown"]
             time.sleep(cooldown)
             return room
@@ -99,6 +100,11 @@ def move_player(direction, cur_room_id):
             room_req.raise_for_status()
             room = room_req.json()
             cooldown = room["cooldown"]
+            print("room response: ", room)
+            # parse room["messages"] for treasure
+            # if treasure -> check inventory
+            # if room in inventory -> pick up and continue on
+            # if not inventory -> do not pick up
             print(room["messages"])
             time.sleep(cooldown)
             return room
@@ -211,6 +217,23 @@ def check_status():
         cooldown = status['cooldown']
         time.sleep(cooldown)
         return status
+    # if cooldown applies, add exception and while loop
+    except requests.exceptions.RequestException as exception:
+        print(exception)
+        sys.exit(1)
+
+def change_name():
+    try:
+        name = requests.post(
+            f'{url}/adv/change_name/',
+            headers={
+                'Authorization': f'Token {key}',
+                'Content-Type': 'application/json'
+            }
+        )
+        cooldown = name['cooldown']
+        time.sleep(cooldown)
+        return name
     # if cooldown applies, add exception and while loop
     except requests.exceptions.RequestException as exception:
         print(exception)
