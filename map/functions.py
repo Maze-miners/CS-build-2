@@ -222,7 +222,7 @@ def check_status():
         print(exception)
         sys.exit(1)
 
-def change_name():
+def change_name(name):
     try:
         name = requests.post(
             f'{url}/adv/change_name/',
@@ -230,6 +230,9 @@ def change_name():
                 'Authorization': f'Token {key}',
                 'Content-Type': 'application/json'
             }
+            data=json.dumps({
+                "name": f"{name}"
+            })
         )
         cooldown = name['cooldown']
         time.sleep(cooldown)
