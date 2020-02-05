@@ -8,7 +8,6 @@ import pdb
 import sys
 
 # exec(open("./map/build-map.py").read())
-# curl -X POST -H 'Authorization: Token f44f1bbfeb616d23476784a70a2a4a7543ef202c' -H "Content-Type: application/json" -d '{"direction":"w"}' https://lambda-treasure-hunt.herokuapp.com/api/adv/move/
 
 class Graph:
     def __init__(self):
@@ -101,7 +100,7 @@ class Graph:
                         # move in direction provided by bfs
                         print(move)
                         prev_room = curr_room
-                        curr_room = move_player(move[1])                   
+                        curr_room = move_player(move[1], prev_room["room_id"])                   
                     unex_list = []
                     for key, value in self.rooms[new_room].items():
                         if value == "?":
@@ -122,7 +121,7 @@ class Graph:
             f.close()
 
             # iterate
-            curr_room = move_player(random_dir)
+            curr_room = move_player(random_dir, prev_room["room_id"])
             stack.push(curr_room)
     
     def bfs(self, first_room):
@@ -154,10 +153,10 @@ for room in rooms:
 
 # extract previous room_id
 p = open("prev_room.txt", "r")
-prev_room = p.read()
+pre_room = p.read()
+prev_room = int(pre_room)
 p.close()
 print(prev_room)
-print(bool(prev_room == 'None'))
 
 # extract previous random dir
 r = open("random_dir.txt", "r")
@@ -165,14 +164,15 @@ random_dir = r.read()
 r.close()
 print(random_dir)
 
-opposite = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
+opposite = {"n": "s", "s": "n", "e": "w", "w": "e"}
 
 # if picking back up after interrupt
-if prev_room != 'None':
+if prev_room != "None":
     # capture previous room object from API by moving
-    roomObj = move_player(opposite[random_dir])
+    print(type(prev_room))
+    roomObj = move_player(opposite[random_dir], prev_room)
     # return to starting room
-    move_player(random_dir)
+    move_player(random_dir, prev_room)
 else:
     roomObj = prev_room
 

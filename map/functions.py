@@ -11,46 +11,20 @@ key = config('API_KEY')
 
 
 def init_player():
-    while True:
-        try:
-            player_req = requests.get(
-                f"{url}/api/adv/init/",
-                headers={
-                    "Authorization": f"Token {key}"
-                }
-            )
-            player_req.raise_for_status()
-            player = player_req.json()
-            cooldown = player['cooldown']
-            time.sleep(cooldown)
-            return player
-
-        except requests.exceptions.RequestException as exception:
-            # cooldown -> will have to check response object to test
-            if exception.response.status_code == 400:
-                time.sleep(cooldown)
-            else:
-                print(exception)
-                sys.exit(1)
-        
-
-def move_player(direction):
-    print(direction)
-    # while True:    
+    # while True:
     try:
-        room_req = requests.post(
-            f"{url}/api/adv/move/",
+        player_req = requests.get(
+            f"{url}/api/adv/init/",
             headers={
-                "Authorization": f"Token {key}",
-                "Content-Type": "application/json"
-            },
-            data=json.dumps({"direction": f"{direction}"})
+                "Authorization": f"Token {key}"
+            }
         )
-        room_req.raise_for_status()
-        room = room_req.json()
-        cooldown = room["cooldown"]
+        player_req.raise_for_status()
+        player = player_req.json()
+        cooldown = player['cooldown']
         time.sleep(cooldown)
-        return room
+        return player
+
     except requests.exceptions.RequestException as exception:
         # cooldown -> will have to check response object to test
         if exception.response.status_code == 400:
@@ -58,9 +32,65 @@ def move_player(direction):
         else:
             print(exception)
             sys.exit(1)
+        
 
-def move_wise(direction, room_id):
-    pass
+def move_player(direction, cur_room_id):
+    print("!!!", cur_room_id)
+    print(direction)
+    # while True:
+    cur_room = MapRoom.objects.get(room_id=cur_room_id)
+    neighbors = json.loads(MapRoom.objects.get(room_id=cur_room_id).neighbors)
+    print(cur_room.neighbors)
+    print(neighbors)
+
+    if neighbors[direction] == "?":
+        try:
+            room_req = requests.post(
+                f"{url}/api/adv/move/",
+                headers={
+                    "Authorization": f"Token {key}",
+                    "Content-Type": "application/json"
+                },
+                data=json.dumps({"direction": f"{direction}"})
+            )
+            room_req.raise_for_status()
+            room = room_req.json()
+            cooldown = room["cooldown"]
+            time.sleep(cooldown)
+            return room
+        except requests.exceptions.RequestException as exception:
+            # cooldown -> will have to check response object to test
+            if exception.response.status_code == 400:
+                time.sleep(cooldown)
+            else:
+                print(exception)
+                sys.exit(1)
+    else:
+        try:
+            room_req = requests.post(
+                f"{url}/api/adv/move/",
+                headers={
+                    "Authorization": f"Token {key}",
+                    "Content-Type": "application/json"
+                },
+                data=json.dumps({
+                    "direction": f"{direction}",
+                    "next_room_id": f"{neighbors[direction]}"
+                })
+            )
+            room_req.raise_for_status()
+            room = room_req.json()
+            cooldown = room["cooldown"]
+            print(room["messages"])
+            time.sleep(cooldown)
+            return room
+        except requests.exceptions.RequestException as exception:
+            # cooldown -> will have to check response object to test
+            if exception.response.status_code == 400:
+                time.sleep(cooldown)
+            else:
+                print(exception)
+                sys.exit(1)
 
 def take_item(item):
     try:
