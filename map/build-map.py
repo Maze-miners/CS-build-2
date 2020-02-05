@@ -177,4 +177,4 @@ if prev_room != "None":
 else:
     roomObj = prev_room
 
-tg.dft_rand(user, roomObj, random_dir)
+# tg.dft_rand(user, roomObj, random_dir)
