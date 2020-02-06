@@ -1,3 +1,5 @@
 *.env
 prev_room.txt
 random_dir.txt
+
+.vscode/settings.json
