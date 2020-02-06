@@ -107,7 +107,15 @@ def app():
             sell_all_items()
 
         elif prompt == 'n':
-            pass
+            print(bcolors.ITALIC + "\nWhat would you like to change your name to?" + bcolors.ENDC)
+            name_prompt = input(bcolors.HEADER + "\n>>> " + bcolors.ENDC).lower()
+            try:
+                if len(name_prompt) > 0:
+                    change_name(name_prompt)
+                else:
+                    print(bcolors.FAIL + "\nInvalid name" + bcolors.ENDC) 
+            except:
+                print(bcolors.FAIL + "\nInvalid name" + bcolors.ENDC)
 
         elif prompt == 'tw':
             graph.dft_treasure(user, 55)
