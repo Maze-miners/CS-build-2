@@ -1,4 +1,4 @@
-from map.functions import check_status, init_player, check_status
+from map.functions import check_status, init_player, check_status, sell_all_items
 from map.build import Graph
 from treasure.models import MapRoom
 import json
@@ -63,7 +63,7 @@ def app():
                 "\n[tr] Travel to see Pirate Ry"
                 "\n[sa] Sell all items (must be at Shop)"
                 "\n[n] Purchase a name (must be Pirate Ry's)"
-                "\n[w] Travel to the wishing well"
+                "\n[tw] Travel to the wishing well"
                 "\n[m] Mine"
             )
 
@@ -80,19 +80,19 @@ def app():
             graph.dft_treasure(user, rand_room)
 
         elif prompt == 'ts':
-            pass
+            graph.dft_treasure(user, 1)
 
         elif prompt == 'tr':
-            pass
+            graph.dft_treasure(user, 467)
 
         elif prompt == 'sa':
-            pass
+            sell_all_items()
 
         elif prompt == 'n':
             pass
 
-        elif prompt == 'w':
-            pass
+        elif prompt == 'tw':
+            graph.dft_treasure(user, 55)
 
         elif prompt == 'm':
             pass
