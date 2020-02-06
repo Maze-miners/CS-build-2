@@ -133,7 +133,6 @@ class Graph:
         visited_set = set()
         
         while queue.size() > 0:
-            print("runs")
             new_path = queue.dequeue()
             room = new_path[-1][0]
             for direction, value in self.rooms[room].items():
