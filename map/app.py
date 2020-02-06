@@ -1,12 +1,10 @@
-from map.functions import check_status, init_player, check_status, sell_all_items
+from map.functions import check_status, init_player, check_status, sell_all_items, change_name
 from map.build import Graph
 from treasure.models import MapRoom
 import json
-# import re
-# import sys
 import os
-# import time
 import random
+
 # exec(open("./map/app.py").read())
 
 class bcolors:
@@ -29,7 +27,8 @@ def app():
     os.system('cls' if os.name == 'nt' else 'clear')
 
     # init player and welcome by name
-    user = init_player()
+    # print("\n...")
+    # user = init_player()
     # status = check_status()
     # print(bcolors.HEADER + bcolors.BOLD + f"\nWelcome {status["name"]}" + bcolors.ENDC + bcolors.ENDC)
     # print(bcolors.ITALIC + f"{user["title"]} (Room {user["room_id"]})" + bcolors.ENDC)
@@ -51,8 +50,13 @@ def app():
     )
 
     prompt = input(bcolors.HEADER + "\n>>> " + bcolors.ENDC).lower()
+    
     while not prompt == 'q': # game loop
-        # bring app to top of terminal screen
+
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+        print("\n...")
+        user = init_player()
         os.system('cls' if os.name == 'nt' else 'clear')
         
         if prompt == 'o':
@@ -61,6 +65,7 @@ def app():
                 "\n[r] Travel to random room, collecting treasure until inventory is full"
                 "\n[ts] Travel to the shop"
                 "\n[tr] Travel to see Pirate Ry"
+                "\n[ti] Travel to spcified room number"
                 "\n[sa] Sell all items (must be at Shop)"
                 "\n[n] Purchase a name (must be Pirate Ry's)"
                 "\n[tw] Travel to the wishing well"
@@ -85,6 +90,19 @@ def app():
         elif prompt == 'tr':
             graph.dft_treasure(user, 467)
 
+        elif prompt == 'ti':
+            print(bcolors.ITALIC + "\nWhich room number would you like to travel to?" + bcolors.ENDC)
+            room_prompt = input(bcolors.HEADER + "\n>>> " + bcolors.ENDC)
+            try:
+                room_int = int(room_prompt)
+                if 0 <= room_int <= 499:
+                    # curr_room = init_player()
+                    graph.dft_treasure(user, room_int)
+                else:
+                    print(bcolors.FAIL + "\nInvalid room number" + bcolors.ENDC)
+            except:
+                print(bcolors.FAIL + "\nInvalid room number" + bcolors.ENDC)
+            
         elif prompt == 'sa':
             sell_all_items()
 
@@ -108,7 +126,6 @@ def app():
         )
         prompt = input(bcolors.HEADER + "\n>>> " + bcolors.ENDC).lower()
 
-    # bring app to top of terminal screen
     os.system('cls' if os.name == 'nt' else 'clear')
     print(bcolors.ITALIC + "\nGoodbye\n" + bcolors.ENDC)
 

@@ -179,7 +179,7 @@ user = init_player()
 
 
 # ------- cmd to run file from django shell --------
-# exec(open("./map/build-map.py").read())
+# exec(open("./map/map.py").read())
 # --------------------------------------------------
 
 
@@ -224,5 +224,6 @@ user = init_player()
 
 # ----------- UNCOMMENT TO PURCHASE NAME -----------
 # ----------- MUST BE AT SHOP (ROOM 467) -----------
-# change_name()
+# my_name = ?
+# change_name(my_name)
 # --------------------------------------------------
