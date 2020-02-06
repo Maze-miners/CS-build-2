@@ -4,8 +4,8 @@ from treasure.models import MapRoom
 from decouple import config
 import random
 import json
-import pdb
 import sys
+import pdb
 
 class Graph:
     def __init__(self):
@@ -171,12 +171,12 @@ class Graph:
             curr_room = move_player(move[1], prev_room["room_id"])
 
 user = init_player()
-tg = Graph()
+# tg = Graph()
 
-rooms = MapRoom.objects.all()
-for room in rooms:
-    # fill in our graph from populated database
-    tg.rooms[room.room_id] = json.loads(room.neighbors)
+# rooms = MapRoom.objects.all()
+# for room in rooms:
+#     # fill in our graph from populated database
+#     tg.rooms[room.room_id] = json.loads(room.neighbors)
 
 
 # ------- cmd to run file from django shell --------
