@@ -1,13 +1,11 @@
 from map.structures import Queue, Stack
-from map.functions import move_player, init_player, init_move
+from map.functions import move_player, init_player, init_move, sell_all_items, change_name
 from treasure.models import MapRoom
 from decouple import config
 import random
 import json
 import pdb
 import sys
-
-# exec(open("./map/build-map.py").read())
 
 class Graph:
     def __init__(self):
@@ -128,17 +126,24 @@ class Graph:
             curr_room = move_player(random_dir, prev_room["room_id"])
             stack.push(curr_room)
     
-    def bfs(self, first_room):
+    def bfs(self, first_room, target_room=None):
+        print("!!!!!", first_room)
         queue = Queue()
         queue.enqueue([(first_room["room_id"], "")])
         visited_set = set()
         
-        while queue.size() > 0 and len(self.rooms) < 500:
+        while queue.size() > 0:
+            print("runs")
             new_path = queue.dequeue()
             room = new_path[-1][0]
             for direction, value in self.rooms[room].items():
                 if value == "?":
                     return new_path
+                if target_room:
+                    if value == target_room:
+                        next_path = list(new_path)
+                        next_path.append((neighbor, direction))
+                        return next_path
             if room not in visited_set:
                 visited_set.add(room)
                 for direction, neighbor in self.rooms[room].items():
@@ -146,6 +151,24 @@ class Graph:
                         next_path = list(new_path)
                         next_path.append((neighbor, direction))
                         queue.enqueue(next_path)
+
+    def dft_treasure(self, curr_room, rand_room):
+        path = self.bfs(curr_room, rand_room)
+        print("path:", path)
+        if path is None:
+            print("path is none")
+            return
+        new_room = path[-1][0]
+        print("path[-1][0]:", path[-1][0])
+        for move in path[1:]:
+            # move in direction provided by bfs
+            print(move)
+            prev_room = curr_room
+            # write to file
+            f = open("prev_room.txt", "w")
+            f.write(f"{prev_room['room_id']}")
+            f.close()
+            curr_room = move_player(move[1], prev_room["room_id"])
 
 user = init_player()
 tg = Graph()
@@ -155,26 +178,52 @@ for room in rooms:
     # fill in our graph from populated database
     tg.rooms[room.room_id] = json.loads(room.neighbors)
 
-# extract previous room_id
-p = open("prev_room.txt", "r")
-pre_room = p.read()
-prev_room = int(pre_room)
-p.close()
 
-# extract previous random dir
-r = open("random_dir.txt", "r")
-random_dir = r.read()
-r.close()
+# ------- cmd to run file from django shell --------
+# exec(open("./map/build-map.py").read())
+# --------------------------------------------------
 
-opposite = {"n": "s", "s": "n", "e": "w", "w": "e"}
 
-# if picking back up after interrupt
-if prev_room != "None":
-    # capture previous room object from API by moving
-    roomObj = init_move(opposite[random_dir])
-    # return to starting room
-    move_player(random_dir, prev_room)
-else:
-    roomObj = prev_room
+# ------------- UNCOMMENT TO BUILD MAP -------------
+# # extract previous room_id
+# p = open("prev_room.txt", "r")
+# pre_room = p.read()
+# prev_room = int(pre_room)
+# p.close()
+
+# # extract previous random dir
+# r = open("random_dir.txt", "r")
+# random_dir = r.read()
+# r.close()
+
+# opposite = {"n": "s", "s": "n", "e": "w", "w": "e"}
+
+# # if picking back up after interrupt
+# if prev_room != "None":
+#     # capture previous room object from API by moving
+#     roomObj = init_move(opposite[random_dir])
+#     # return to starting room
+#     move_player(random_dir, prev_room)
+# else:
+#     roomObj = prev_room
 
 # tg.dft_rand(user, roomObj, random_dir)
+# --------------------------------------------------
+
+
+# ----- UNCOMMENT TO WALK AND PICK UP TREASURE -----
+# rand_room = random.randint(0, 500)
+# tg.dft_treasure(user, rand_room)
+# --------------------------------------------------
+
+
+# ---------- UNCOMMENT TO SELL ALL ITEMS -----------
+# ----------- MUST BE AT SHOP (ROOM 1) -------------
+# sell_all_items()
+# --------------------------------------------------
+
+
+# ----------- UNCOMMENT TO PURCHASE NAME -----------
+# ----------- MUST BE AT SHOP (ROOM 467) -----------
+# change_name()
+# --------------------------------------------------
