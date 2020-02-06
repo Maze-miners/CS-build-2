@@ -6,8 +6,8 @@ import sys
 import re
 import json
 
-url = config('API_URL')
-key = config('API_KEY')
+url = config("API_URL")
+key = config("API_KEY")
 
 
 
@@ -22,7 +22,7 @@ def init_player():
         )
         player_req.raise_for_status()
         player = player_req.json()
-        cooldown = player['cooldown']
+        cooldown = player["cooldown"]
         time.sleep(cooldown)
         return player
 
@@ -42,7 +42,9 @@ def init_move(direction): # only used when resuming from previous cancellation
                 "Authorization": f"Token {key}",
                 "Content-Type": "application/json"
             },
-            data=json.dumps({"direction": f"{direction}"})
+            data=json.dumps({
+                "direction": f"{direction}"
+            })
         )
         room_req.raise_for_status()
         room = room_req.json()
@@ -70,7 +72,9 @@ def move_player(direction, cur_room_id):
                     "Authorization": f"Token {key}",
                     "Content-Type": "application/json"
                 },
-                data=json.dumps({"direction": f"{direction}"})
+                data=json.dumps({
+                    "direction": f"{direction}"
+                })
             )
             room_req.raise_for_status()
             room = room_req.json()
@@ -101,11 +105,25 @@ def move_player(direction, cur_room_id):
             room_req.raise_for_status()
             room = room_req.json()
             cooldown = room["cooldown"]
+            time.sleep(cooldown)
             print("room response: ", room)
             # parse room["messages"] for treasure
-            # if treasure -> check inventory
-            # if room in inventory -> pick up and continue on
-            # if not inventory -> do not pick up
+            for item in room["items"]:
+                i = str(item)
+                print("item: ", item)
+                treasure = re.search("treasure", i)
+                if treasure:
+                    e = examine_item(item)
+                    status = check_status()
+                    print(e)
+                    # print("exiting!")
+                    # sys.exit(1)
+                    # TODO: will need to check based on large
+                    if status["strength"] - status["encumbrance"] > e["weight"]:
+                        print(f"{item} item picked up")
+                        take_item(item)
+                    else:
+                        continue 
             print(room["messages"])
             time.sleep(cooldown)
             return room
@@ -119,17 +137,21 @@ def move_player(direction, cur_room_id):
 
 def take_item(item):
     try:
-        item = requests.post(
-            f'{url}/api/adv/take/',
+        item_req = requests.post(
+            f"{url}/api/adv/take/",
             headers={
-                'Authorization': f'Token {key}',
-                'Content-Type': 'application/json'
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
             },
-            data={
-                'name': f'{item}'
-            }
+            data=json.dumps({
+                "name": f"{item}"
+            })
         )
-        return item
+        item_req.raise_for_status()
+        i = item_req.json()
+        cooldown = i["cooldown"]
+        time.sleep(cooldown)
+        return i
     # if cooldown applies, add exception and while loop
     except requests.exceptions.RequestExceptions as exception:
         print(exception)
@@ -137,108 +159,110 @@ def take_item(item):
 
 def drop_item(item):
     try:
-        item = requests.post(
-            f'{url}/api/adv/drop/',
+        drop_req = requests.post(
+            f"{url}/api/adv/drop/",
             headers={
-                'Authorization': f'Token {key}',
-                'Content-Type': 'application/json'
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
             },
-            data={
-                'name': f'{item}'
-            }
+            data=json.dumps({
+                "name": f"{item}"
+            })
         )
-        return item
+        drop_req.raise_for_status()
+        drop = drop_req.json()
+        return drop
     # if cooldown applies, add exception and while loop
     except requests.exceptions.RequestExceptions as exception:
         print(exception)
         sys.exit(1)
 
-def sell_treasure():
-    while True:
-        try:
-            sale = requests.post(
-                f'{url}/api/adv/sell/',
-                headers={
-                    'Authorization': f'Token {key}',
-                    'Content-Type': 'application/json'
-                },
-                data={
-                    'name': 'treasure'
-                }
-            )
-            message = sale['messages']
-            cooldown = sale['cooldown']
-            time.sleep(cooldown)
-            # returns a message and requires confirmation to sell
-            edited_message = re.sub('\([^)]*\)', '(choose YES or NO.)', message)
-            print(edited_message)
-            prompt = input().lower().strip()
-            if prompt == 'yes' or prompt == 'y':
-                # make call to confirm
-                return confirm_treasure()
-            elif prompt == 'no' or prompt == 'n':
-                # print confirmation message and return
-                # need to decide how to handle return within algorithm
-                print("Sale declined.")
-                return
-        # if cooldown applies, add exception and while loop
-        except requests.exceptions.RequestException as exception:
-            print(exception)
-            sys.exit(1)
-
-def confirm_treasure():
+def sell_item(item):
     try:
-        confirm = requests.post(
-            f'{url}/api/adv/sell/',
+        sell_req = requests.post(
+            f"{url}/api/adv/sell/",
             headers={
-                'Authorization': f'Token {key}',
-                'Content-Type': 'application/json'
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
             },
-            data={
-                'name': 'treasure',
-                'confirm': 'yes'
-            }
+            data=json.dumps({
+                "name": f"{item}",
+                "confirm": "yes"
+            })
         )
-        cooldown = confirm['cooldown']
+        sell_req.raise_for_status()
+        sell = sell_req.json()
+        message = sell["messages"]
+        cooldown = sell["cooldown"]
         time.sleep(cooldown)
-        return confirm
+        return sell
     except requests.exceptions.RequestException as exception:
         print(exception)
         sys.exit(1)
 
+def sell_all_items():
+    status = check_status()
+    for item in status["inventory"]:
+        print(item)
+        sell_item(item)
+
 def check_status():
     try:
-        status = requests.post(
-            f'{url}/api/adv/status/',
+        status_req = requests.post(
+            f"{url}/api/adv/status/",
             headers={
-                'Authorization': f'Token {key}',
-                'Content-Type': 'application/json'
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
             }
         )
-        cooldown = status['cooldown']
+        status_req.raise_for_status()
+        status = status_req.json()
+        cooldown = status["cooldown"]
         time.sleep(cooldown)
         return status
-    # if cooldown applies, add exception and while loop
     except requests.exceptions.RequestException as exception:
         print(exception)
         sys.exit(1)
 
 def change_name(name):
     try:
-        name = requests.post(
-            f'{url}/adv/change_name/',
+        name_req = requests.post(
+            f"{url}/api/adv/change_name/",
             headers={
-                'Authorization': f'Token {key}',
-                'Content-Type': 'application/json'
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
             },
             data=json.dumps({
-                "name": f"{name}"
+                "name": f"{name}",
+                "confirm": "aye"
             })
         )
-        cooldown = name['cooldown']
+        name_req.raise_for_status()
+        name = name_req.json()
+        cooldown = name["cooldown"]
         time.sleep(cooldown)
         return name
-    # if cooldown applies, add exception and while loop
+    except requests.exceptions.RequestException as exception:
+        print(exception)
+        sys.exit(1)
+
+def examine_item(item):
+    try:
+        examine_req = requests.post(
+            f"{url}/api/adv/examine/",
+            headers={
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
+            },
+            data=json.dumps({
+                "name": f"{item}"
+            })
+        )
+        examine_req.raise_for_status()
+        examine = examine_req.json()
+        cooldown = examine["cooldown"]
+        time.sleep(cooldown)
+        return examine
     except requests.exceptions.RequestException as exception:
         print(exception)
         sys.exit(1)
