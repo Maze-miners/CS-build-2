@@ -10,6 +10,7 @@ url = config('API_URL')
 key = config('API_KEY')
 
 
+
 def init_player():
     # while True:
     try:
@@ -229,7 +230,7 @@ def change_name(name):
             headers={
                 'Authorization': f'Token {key}',
                 'Content-Type': 'application/json'
-            }
+            },
             data=json.dumps({
                 "name": f"{name}"
             })
@@ -237,6 +238,27 @@ def change_name(name):
         cooldown = name['cooldown']
         time.sleep(cooldown)
         return name
+    # if cooldown applies, add exception and while loop
+    except requests.exceptions.RequestException as exception:
+        print(exception)
+        sys.exit(1)
+
+def mine_coin(proof):
+    try:
+        proof_req = requests.post(
+            f'{url}/api/bc/mine/',
+            headers={
+                'Authorization': f'Token {key}',
+                'Content-Type': 'application/json'
+            },
+            data=json.dumps({
+                "name": f"{proof}"
+            })
+        )
+        proof = proof_req.json()
+        cooldown = proof['cooldown']
+        time.sleep(cooldown)
+        return proof
     # if cooldown applies, add exception and while loop
     except requests.exceptions.RequestException as exception:
         print(exception)
