@@ -1,10 +1,12 @@
 from decouple import config
 from treasure.models import MapRoom
+from map.ls8.cpu import CPU
 import requests
 import time
 import sys
 import re
 import json
+import subprocess
 
 url = config("API_URL")
 key = config("API_KEY")
@@ -324,3 +326,7 @@ def examine_well():
     except requests.exceptions.RequestException as exception:
         print(exception)
         sys.exit(1)
+
+def translate_code():
+    translation = subprocess.call([sys.executable, 'map/ls8/ls8.py', 'map/ls8/examine_well.ls8'])
+    return translation

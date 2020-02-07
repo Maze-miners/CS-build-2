@@ -1,4 +1,4 @@
-from map.functions import check_status, init_player, check_status, sell_all_items, change_name, examine_well
+from map.functions import check_status, init_player, check_status, sell_all_items, change_name, examine_well, translate_code
 from map.build import Graph
 from map.miner import mine_for_coin
 from treasure.models import MapRoom
@@ -126,14 +126,15 @@ def app():
             mine_for_coin()
 
         elif prompt == 'ew':
+            print("\n...")
             well = examine_well()
-            print(well)
-            # TODO: write return to text file
             message = well["description"]
             code = message[41:]
-            f = open("map/ls8/examine_well.txt", "w")
+            f = open("map/ls8/examine_well.ls8", "w")
             f.write(code)
             f.close()
+            c = translate_code()
+            print(c)
         
         else:
             print(bcolors.FAIL + "\nInvalid choice" + bcolors.ENDC)
