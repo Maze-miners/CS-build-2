@@ -35,7 +35,6 @@ def proof_of_work(last_proof, difficulty):
         proof += 1
 
     print("\nProof found: " + str(proof) + " in " + str(timer() - start))
-    print("PROOF: ", proof)
     return proof
 
 

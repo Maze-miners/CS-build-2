@@ -1,14 +1,23 @@
 from decouple import config
 from treasure.models import MapRoom
+from map.ls8.cpu import CPU
 import requests
 import time
 import sys
 import re
 import json
+import subprocess
 
 url = config("API_URL")
 key = config("API_KEY")
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKGREEN = '\033[92m'
+    FAIL = '\033[91m'
+    BOLD = '\033[1m'
+    ITALIC = '\033[3m'
+    ENDC = '\033[0m'
 
 def init_player():
     # while True:
@@ -105,25 +114,30 @@ def move_player(direction, cur_room_id):
             room = room_req.json()
             cooldown = room["cooldown"]
             time.sleep(cooldown)
-            print("room response: ", room)
-            # parse room["messages"] for treasure
-            for item in room["items"]:
-                i = str(item)
-                print("item: ", item)
-                treasure = re.search("treasure", i)
-                if treasure:
-                    e = examine_item(item)
-                    status = check_status()
-                    print(e)
-                    # print("exiting!")
-                    # sys.exit(1)
-                    # TODO: will need to check based on large
-                    if status["strength"] - status["encumbrance"] > e["weight"]:
-                        print(f"{item} item picked up")
-                        take_item(item)
-                    else:
-                        continue 
-            print(room["messages"])
+            print("\n- - - - - - - - - - - - - - - - -\n")
+            print(room["messages"][0])
+            print(room["messages"][1])
+            print(bcolors.HEADER + "\nYou are in room " + str(room["room_id"]) + " - " + room["title"] + bcolors.ENDC)
+            print(room["description"])
+            if len(room["players"]):
+                print(bcolors.BOLD + "\nPLAYERS" + bcolors.ENDC)
+                for val in room["players"]:
+                    print(val)
+            if len(room["items"]):
+                print(bcolors.BOLD + "\nITEMS" + bcolors.ENDC)
+                for item in room["items"]:
+                    i = str(item)
+                    print(i)
+                    treasure = re.search("treasure", i) # currently only searching for treasure
+                    if treasure:
+                        e = examine_item(item)
+                        status = check_status()
+                        if status["strength"] - status["encumbrance"] > e["weight"]:
+                            print(f"{item} item picked up")
+                            take_item(item)
+                        else:
+                            print("\nInventory full. Return to shop to sell items.")
+                            continue
             time.sleep(cooldown)
             return room
         except requests.exceptions.RequestException as exception:
@@ -297,6 +311,7 @@ def mine_coin(proof):
         )
         proof_req.raise_for_status()
         p = proof_req.json()
+        print("PROOF RES: ", p)
         cooldown = p["cooldown"]
         time.sleep(cooldown)
         return p
@@ -324,3 +339,7 @@ def examine_well():
     except requests.exceptions.RequestException as exception:
         print(exception)
         sys.exit(1)
+
+def translate_code():
+    translation = subprocess.call([sys.executable, 'map/ls8/ls8.py', 'map/ls8/examine_well.ls8'])
+    return translation

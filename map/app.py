@@ -1,10 +1,11 @@
-from map.functions import check_status, init_player, check_status, sell_all_items, change_name, examine_well
+from map.functions import check_status, init_player, check_status, sell_all_items, change_name, examine_well, translate_code
 from map.build import Graph
 from map.miner import mine_for_coin
 from treasure.models import MapRoom
 import json
 import os
 import random
+import time
 
 # exec(open("./map/app.py").read())
 
@@ -98,7 +99,6 @@ def app():
             try:
                 room_int = int(room_prompt)
                 if 0 <= room_int <= 499:
-                    # curr_room = init_player()
                     graph.dft_treasure(user, room_int)
                 else:
                     print(bcolors.FAIL + "\nInvalid room number" + bcolors.ENDC)
@@ -126,9 +126,18 @@ def app():
             mine_for_coin()
 
         elif prompt == 'ew':
+            print("\n...")
+            print("\nPeering into the well...")
+            time.sleep(1.5)
+            print("Translating code...")
             well = examine_well()
-            print(well)
-            # TODO: write return to text file
+            message = well["description"]
+            code = message[41:]
+            f = open("map/ls8/examine_well.ls8", "w")
+            f.write(code)
+            f.close()
+            c = translate_code()
+            print(c)
         
         else:
             print(bcolors.FAIL + "\nInvalid choice" + bcolors.ENDC)

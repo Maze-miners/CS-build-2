@@ -11,6 +11,7 @@ MULT2PRINT = 0b00011000
 # JNE = 0b01010110
 # CMP = 0b10100111
 # PRA = 0b01001000
+# NOT = 0b01101001
 
 import sys
 import pdb
@@ -67,6 +68,17 @@ class CPU:
             self.reg[reg_a] *= self.reg[reg_b]
             return self.reg[reg_a]
         
+        elif op == "NOT":
+            self.reg[reg_a] = self.reg[reg_a] ^ reg_b
+
+        elif op == "AND":
+            val = self.reg[reg_a] & self.reg[reg_b]
+            self.reg[reg_a] = val
+
+        elif op == "XOR":
+            val = self.reg[reg_a] ^ self.reg[reg_b]
+            self.reg[reg_a] = val
+        
         elif op == "CMP":
             if reg_a == reg_b:
                 # set E flag to true
@@ -122,6 +134,7 @@ class CPU:
         # read value in self.pc
         running = True
         while running:
+            # print("count: ", self.pc)
             IR = self.ram[self.pc]
             params = (IR >> 6)
             subroutine = ((IR >> 4) & 0b1) == 1
@@ -155,8 +168,23 @@ class CPU:
                 self.pc += params
                 self.pc += 1
                             
-            elif IR == 0b10100111: #CMP
+            elif IR == 0b10100111: # CMP
                 self.alu("CMP", self.reg[self.ram[self.pc + 1]], self.reg[self.ram[self.pc + 2]])
+                self.pc += params
+                self.pc += 1
+            
+            elif IR == 0b01101001: # NOT
+                self.alu("NOT", self.ram[self.pc + 1], 0b11111111)
+                self.pc += params
+                self.pc += 1
+            
+            elif IR == 0b10101000: # AND
+                self.alu("AND", self.ram[self.pc + 1], self.ram[self.pc + 2])
+                self.pc += params
+                self.pc += 1
+
+            elif IR == 0b10101011: # XOR
+                self.alu("XOR", self.ram[self.pc + 1], self.ram[self.pc + 2])
                 self.pc += params
                 self.pc += 1
             
@@ -225,4 +253,4 @@ class CPU:
 
     def handle_pra(self):
         print(chr(self.reg[self.ram[self.pc + 1]]))
-        self.pc += 2
+        

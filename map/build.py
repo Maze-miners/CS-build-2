@@ -127,7 +127,6 @@ class Graph:
             stack.push(curr_room)
     
     def bfs(self, first_room, target_room=None):
-        print("!!!!!", first_room)
         queue = Queue()
         queue.enqueue([(first_room["room_id"], "")])
         visited_set = set()
@@ -153,37 +152,27 @@ class Graph:
 
     def dft_treasure(self, curr_room, rand_room):
         path = self.bfs(curr_room, rand_room)
-        print("path:", path)
+        print("Moves to get to destination: ", len(path))
         if path is None:
             print("path is none")
             return
         new_room = path[-1][0]
-        print("path[-1][0]:", path[-1][0])
         for move in path[1:]:
             # move in direction provided by bfs
-            print(move)
             prev_room = curr_room
+            print("Traveling ", move[1].upper())
             # write to file
-            f = open("prev_room.txt", "w")
-            f.write(f"{prev_room['room_id']}")
-            f.close()
+            # f = open("prev_room.txt", "w")
+            # f.write(f"{prev_room["room_id"]}")
+            # f.close()
             curr_room = move_player(move[1], prev_room["room_id"])
 
 user = init_player()
-# tg = Graph()
-
-# rooms = MapRoom.objects.all()
-# for room in rooms:
-#     # fill in our graph from populated database
-#     tg.rooms[room.room_id] = json.loads(room.neighbors)
-
-
-# ------- cmd to run file from django shell --------
-# exec(open("./map/map.py").read())
-# --------------------------------------------------
-
 
 # ------------- UNCOMMENT TO BUILD MAP -------------
+# requires a prev_room.txt and random_dir.txt file 
+#   with str<None> on first line
+# also requires uncommenting out lines 164-167
 # # extract previous room_id
 # p = open("prev_room.txt", "r")
 # pre_room = p.read()
@@ -207,23 +196,4 @@ user = init_player()
 #     roomObj = prev_room
 
 # tg.dft_rand(user, roomObj, random_dir)
-# --------------------------------------------------
-
-
-# ----- UNCOMMENT TO WALK AND PICK UP TREASURE -----
-# rand_room = random.randint(0, 500)
-# tg.dft_treasure(user, rand_room)
-# --------------------------------------------------
-
-
-# ---------- UNCOMMENT TO SELL ALL ITEMS -----------
-# ----------- MUST BE AT SHOP (ROOM 1) -------------
-# sell_all_items()
-# --------------------------------------------------
-
-
-# ----------- UNCOMMENT TO PURCHASE NAME -----------
-# ----------- MUST BE AT SHOP (ROOM 467) -----------
-# my_name = ?
-# change_name(my_name)
 # --------------------------------------------------
