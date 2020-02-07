@@ -5,6 +5,7 @@ from treasure.models import MapRoom
 import json
 import os
 import random
+import time
 
 # exec(open("./map/app.py").read())
 
@@ -98,7 +99,6 @@ def app():
             try:
                 room_int = int(room_prompt)
                 if 0 <= room_int <= 499:
-                    # curr_room = init_player()
                     graph.dft_treasure(user, room_int)
                 else:
                     print(bcolors.FAIL + "\nInvalid room number" + bcolors.ENDC)
@@ -127,6 +127,9 @@ def app():
 
         elif prompt == 'ew':
             print("\n...")
+            print("\nPeering into the well...")
+            time.sleep(1.5)
+            print("Translating code...")
             well = examine_well()
             message = well["description"]
             code = message[41:]
