@@ -1,9 +1,11 @@
-from map.functions import check_status, init_player, check_status, sell_all_items, change_name
+from map.functions import check_status, init_player, check_status, sell_all_items, change_name, examine_well, translate_code
 from map.build import Graph
+from map.miner import mine_for_coin
 from treasure.models import MapRoom
 import json
 import os
 import random
+import time
 
 # exec(open("./map/app.py").read())
 
@@ -27,12 +29,12 @@ def app():
     os.system('cls' if os.name == 'nt' else 'clear')
 
     # init player and welcome by name
-    # print("\n...")
-    # user = init_player()
-    # status = check_status()
-    # print(bcolors.HEADER + bcolors.BOLD + f"\nWelcome {status["name"]}" + bcolors.ENDC + bcolors.ENDC)
-    # print(bcolors.ITALIC + f"{user["title"]} (Room {user["room_id"]})" + bcolors.ENDC)
-    # print(bcolors.ITALIC + f"{user["description"]}" + bcolors.ENDC)
+    print("\n...")
+    user = init_player()
+    status = check_status()
+    print(bcolors.HEADER + bcolors.BOLD + "\nWelcome " + status["name"] + bcolors.ENDC + bcolors.ENDC)
+    print(bcolors.ITALIC + "You are in room " + str(user["room_id"]) + " - " + user["title"] + bcolors.ENDC)
+    print(bcolors.ITALIC + user["description"] + bcolors.ENDC)
 
     print(bcolors.HEADER + bcolors.BOLD + "\nWelcome [USER]" + bcolors.ENDC + bcolors.ENDC)
 
@@ -62,13 +64,14 @@ def app():
         if prompt == 'o':
             print(
                 "\nOPTIONS:"
-                "\n[r] Travel to random room, collecting treasure until inventory is full"
+                "\n[r] Travel randomly and pick up treasure"
                 "\n[ts] Travel to the shop"
                 "\n[tr] Travel to see Pirate Ry"
                 "\n[ti] Travel to spcified room number"
                 "\n[sa] Sell all items (must be at Shop)"
                 "\n[n] Purchase a name (must be Pirate Ry's)"
                 "\n[tw] Travel to the wishing well"
+                "\n[ew] Examine the wishing well"
                 "\n[m] Mine"
             )
 
@@ -96,7 +99,6 @@ def app():
             try:
                 room_int = int(room_prompt)
                 if 0 <= room_int <= 499:
-                    # curr_room = init_player()
                     graph.dft_treasure(user, room_int)
                 else:
                     print(bcolors.FAIL + "\nInvalid room number" + bcolors.ENDC)
@@ -121,7 +123,21 @@ def app():
             graph.dft_treasure(user, 55)
 
         elif prompt == 'm':
-            pass
+            mine_for_coin()
+
+        elif prompt == 'ew':
+            print("\n...")
+            print("\nPeering into the well...")
+            time.sleep(1.5)
+            print("Translating code...")
+            well = examine_well()
+            message = well["description"]
+            code = message[41:]
+            f = open("map/ls8/examine_well.ls8", "w")
+            f.write(code)
+            f.close()
+            c = translate_code()
+            print(c)
         
         else:
             print(bcolors.FAIL + "\nInvalid choice" + bcolors.ENDC)
