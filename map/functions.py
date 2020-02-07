@@ -265,3 +265,62 @@ def examine_item(item):
     except requests.exceptions.RequestException as exception:
         print(exception)
         sys.exit(1)
+
+def get_last_proof():
+    try:
+        last_proof_req = requests.get(
+            f"{url}/api/bc/last_proof/",
+            headers={
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
+            }
+        )
+        last_proof = last_proof_req.json()
+        cooldown = last_proof["cooldown"]
+        time.sleep(cooldown)
+        return last_proof
+    except requests.exceptions.RequestException as exception:
+        print(exception)
+        sys.exit(1)
+
+def mine_coin(proof):
+    try:
+        proof_req = requests.post(
+            f"{url}/api/bc/mine/",
+            headers={
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
+            },
+            data=json.dumps({
+                "proof": proof
+            })
+        )
+        proof_req.raise_for_status()
+        p = proof_req.json()
+        cooldown = p["cooldown"]
+        time.sleep(cooldown)
+        return p
+    except requests.exceptions.RequestException as exception:
+        print(exception)
+        sys.exit(1)
+
+def examine_well():
+    try:
+        examine_req = requests.post(
+            f"{url}/api/adv/examine/",
+            headers={
+                "Authorization": f"Token {key}",
+                "Content-Type": "application/json"
+            },
+            data=json.dumps({
+                "name": "well"
+            })
+        )
+        examine_req.raise_for_status()
+        examine = examine_req.json()
+        cooldown = examine["cooldown"]
+        time.sleep(cooldown)
+        return examine
+    except requests.exceptions.RequestException as exception:
+        print(exception)
+        sys.exit(1)
