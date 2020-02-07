@@ -216,7 +216,7 @@ def sell_item(item):
 def sell_all_items():
     status = check_status()
     for item in status["inventory"]:
-        print(item)
+        print("sold ", item)
         sell_item(item)
 
 def check_status():
@@ -298,26 +298,33 @@ def get_last_proof():
         sys.exit(1)
 
 def mine_coin(proof):
-    try:
-        proof_req = requests.post(
-            f"{url}/api/bc/mine/",
-            headers={
-                "Authorization": f"Token {key}",
-                "Content-Type": "application/json"
-            },
-            data=json.dumps({
-                "proof": proof
-            })
-        )
-        proof_req.raise_for_status()
-        p = proof_req.json()
-        print("PROOF RES: ", p)
-        cooldown = p["cooldown"]
-        time.sleep(cooldown)
-        return p
-    except requests.exceptions.RequestException as exception:
-        print(exception)
-        sys.exit(1)
+    while True:
+        try:
+            proof_req = requests.post(
+                f"{url}/api/bc/mine/",
+                headers={
+                    "Authorization": f"Token {key}",
+                    "Content-Type": "application/json"
+                },
+                data=json.dumps({
+                    "proof": proof
+                })
+            )
+            proof_req.raise_for_status()
+            p = proof_req.json()
+            print(p["messages"][0])
+            cooldown = p["cooldown"]
+            time.sleep(cooldown)
+            return p
+        except requests.exceptions.RequestException as exception:
+            if exception.response.status_code == 400:
+                print("if you see this error, print exception message")
+                print(dir(exception))
+                print("400 error")
+                continue
+            else:
+                print(exception)
+                sys.exit(1)
 
 def examine_well():
     try:

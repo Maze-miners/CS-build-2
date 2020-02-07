@@ -27,7 +27,7 @@ def proof_of_work(last_proof, difficulty):
     start = timer()
 
     print("\nSearching for next proof")
-    proof = random.randint(0, 500000)
+    proof = random.randint(0, 5000)
 
     block_string = json.dumps(last_proof)
     # will run until valid proof is found
