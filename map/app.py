@@ -129,6 +129,11 @@ def app():
             well = examine_well()
             print(well)
             # TODO: write return to text file
+            message = well["description"]
+            code = message[41:]
+            f = open("map/ls8/examine_well.txt", "w")
+            f.write(code)
+            f.close()
         
         else:
             print(bcolors.FAIL + "\nInvalid choice" + bcolors.ENDC)
